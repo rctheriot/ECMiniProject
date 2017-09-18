@@ -14,6 +14,8 @@ public class Landscape : MonoBehaviour {
     private bool pause;
     public Text pauseText;
 
+    public Material landMat, boundMat;
+
     [Space(10)]
     public Color landscapeColor;
     public float lineWidth;
@@ -94,8 +96,7 @@ public class Landscape : MonoBehaviour {
         newLine.name = StartPoint.ToString() + ", " + EndPoint.ToString();
         newLine.transform.parent = GridParent;
         LineRenderer lr = newLine.AddComponent<LineRenderer>();
-        lr.material = new Material(Shader.Find("Particles/Alpha Blended"));
-        lr.material.SetColor("_TintColor", landscapeColor);
+        lr.material = landMat;
         lr.useWorldSpace = false;
         lr.positionCount = 20;
         lr.startWidth = lineWidth;
@@ -123,7 +124,7 @@ public class Landscape : MonoBehaviour {
                 float zPos = (StartPoint.z - EndPoint.z) * ((float)i / (lr.positionCount - 1)) + EndPoint.z;
 
                 //Formula 2
-                float yPos = 10 * Mathf.Cos(3.0f * Mathf.Pow(Mathf.Pow(xPos, 2.0f) + Mathf.Pow(zPos, 2.0f), 0.5f) + 1f * 0.5f);
+                float yPos = 10 * Mathf.Cos(3.0f * Mathf.Pow(Mathf.Pow(xPos, 2.0f) + Mathf.Pow(zPos, 2.0f), 0.5f) + 0.5f);
 
                 if (yPos < yMin) yMin = yPos;
                 if (yPos > yMax) yMax = yPos;
@@ -163,8 +164,7 @@ public class Landscape : MonoBehaviour {
         GameObject newLine = new GameObject();
         newLine.transform.parent = bbParent;
         LineRenderer lr = newLine.AddComponent<LineRenderer>();
-        lr.material = new Material(Shader.Find("Standard"));
-        lr.material.SetColor("_Color", Color.white);
+        lr.material = boundMat;
         lr.useWorldSpace = false;
         lr.positionCount = 2;
         lr.startWidth = 0.075f;

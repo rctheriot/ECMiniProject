@@ -94,7 +94,7 @@ public class Evolution : MonoBehaviour
         else if (landscape.selectedFormula == Landscape.Formulas.formula2)
         {
             //Formula 2
-            float fitness = 10 * Mathf.Cos(3.0f * Mathf.Pow(Mathf.Pow(xPos, 2.0f) + Mathf.Pow(zPos, 2.0f), 0.5f) + 1f * 0.5f);
+            float fitness = 10 * Mathf.Cos(3.0f * Mathf.Pow(Mathf.Pow(xPos, 2.0f) + Mathf.Pow(zPos, 2.0f), 0.5f) + 0.5f);
             return fitness;
         }
         return 0;
