@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Landscape : MonoBehaviour {
 
@@ -10,11 +11,17 @@ public class Landscape : MonoBehaviour {
     public float yMin = float.MaxValue;
     public float yMax = float.MinValue;
 
+    private bool pause;
+    public Text pauseText;
+
     [Space(10)]
     public Color landscapeColor;
     public float lineWidth;
 
     public int numLines;
+
+    public Evolution[] evoList;
+    public LineChart chart;
 
     public enum Formulas
     {
@@ -26,6 +33,41 @@ public class Landscape : MonoBehaviour {
 	void Awake () {
         CreateLandscape();
         CreateBoundingBox();
+    }
+
+    void Start()
+    {
+        transform.localScale = new Vector3(.6f, .05f, .6f);
+        transform.rotation = Quaternion.Euler(-20, 40, -10);
+        pause = true;
+        InvokeRepeating("Evolve", 1.0f, 0.5f);
+    }
+
+    public void pauseStart()
+    {
+        pause = !pause;
+        if (pause)
+        {
+            pauseText.text = "Play";
+            pauseText.transform.parent.GetComponent<Image>().color = Color.green;
+        } else
+        {
+            pauseText.text = "Pause";
+            pauseText.transform.parent.GetComponent<Image>().color = Color.red;
+        }
+    }
+
+    void Evolve()
+    {
+        if (pause) return;
+        if (evoList[0].offspringCount > 300) return;
+
+        for (int i =0; i < evoList.Length; i++)
+        {
+            evoList[i].Evolve();
+        }
+
+        chart.BirthUpdate();
     }
 
     void CreateLandscape()
@@ -161,6 +203,11 @@ public class Landscape : MonoBehaviour {
         float degrees = Mathf.Rad2Deg * value;
         if (degrees > 180) degrees -= 360;
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, degrees);
+    }
+
+    public void RestartScene()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("SetSeed", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
 }

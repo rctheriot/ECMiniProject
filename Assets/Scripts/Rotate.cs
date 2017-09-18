@@ -11,6 +11,7 @@ public class Rotate : MonoBehaviour {
     void Start()
     {
         coll = GetComponent<Collider>();
+        transform.rotation = GameObject.Find("Landscape").transform.rotation;
     }
 
 

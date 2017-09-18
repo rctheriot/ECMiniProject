@@ -8,7 +8,11 @@ public class Evolution : MonoBehaviour
 
     public GameObject SpherePrefab;
 
+    public string name;
+
     public int populationInit;
+
+    public static int seed;
 
     public List<Individual> listOfPopulation = new List<Individual>();
     public Color populationColor;
@@ -17,7 +21,7 @@ public class Evolution : MonoBehaviour
     public int offspringCount;
     public Text offspringText;
 
-    public Landscape landscape;
+    private Landscape landscape;
 
     public float avgFitness;
 
@@ -27,6 +31,7 @@ public class Evolution : MonoBehaviour
     {
         mutation1,
         mutation2,
+        mutation3
     }
 
 
@@ -43,22 +48,24 @@ public class Evolution : MonoBehaviour
             Renderer rend = gameObject.GetComponent<Renderer>();
             rend.material.shader = Shader.Find("Standard");
             rend.material.SetColor("_Color", deathColor);
-            Destroy(gameObject, 2.0f);
+            Destroy(gameObject, 1.0f);
         }
 
     }
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         landscape = GameObject.Find("Landscape").GetComponent<Landscape>();
-
+        Random.InitState(seed);
+        Random initRandom = new Random();
         for (int i = 0; i < populationInit; i++)
         {
             Individual ind = new Individual();
 
             ind.p1 = Random.Range(landscape.xBound.x, landscape.xBound.y);
             ind.p2 = Random.Range(landscape.zBound.x, landscape.zBound.y);
+
             ind.fitness = Fitness(ind.p1, ind.p2);
             ind.gameObject = Instantiate(SpherePrefab, new Vector3(ind.p1, ind.fitness, ind.p2), transform.rotation, transform);
             ind.gameObject.transform.parent = transform;
@@ -68,17 +75,12 @@ public class Evolution : MonoBehaviour
             listOfPopulation.Add(ind);
             offspringCount++;
         }
-        offspringText.text = "Births: " + offspringCount + "  Generation: " + (int)(offspringCount / 10);
+        offspringText.text = "[Births: " + offspringCount +
+                     "] [Generation: " + (int)(offspringCount / populationInit) +
+                     "] [Mutation: " + name +
+                     "] [AvgDistance: " + AvgDistance() + "]";
+        offspringText.color = populationColor;
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Evolve(ref listOfPopulation);
-        }
     }
 
     float Fitness(float xPos, float zPos)
@@ -98,13 +100,16 @@ public class Evolution : MonoBehaviour
         return 0;
     }
 
-    public void Evolve(ref List<Individual> currentPopulation)
+    public void Evolve()
     {
         offspringCount++;
-        offspringText.text = "Briths: " + offspringCount + "  Generation: " + (int)(offspringCount / populationInit);
+        offspringText.text = "[Births: " + offspringCount +
+                     "] [Generation: " + (int)(offspringCount / populationInit) +
+                     "] [Mutation: " + name +
+                     "] [AvgDistance: " + AvgDistance() + "]";
 
         //Randomly select parent to produce offsrping
-        Individual selectedParent = currentPopulation[Random.Range(0, currentPopulation.Count)];
+        Individual selectedParent = listOfPopulation[Random.Range(0, listOfPopulation.Count)];
 
         //New Offspring
         Individual ind = new Individual();
@@ -113,6 +118,8 @@ public class Evolution : MonoBehaviour
         if (selectedMutation == Mutation.mutation1)
             Mutation1(selectedParent, ind);
         if (selectedMutation == Mutation.mutation2)
+            Mutation2(selectedParent, ind);
+        if (selectedMutation == Mutation.mutation3)
             Mutation2(selectedParent, ind);
 
         //Limit to landscape
@@ -123,13 +130,13 @@ public class Evolution : MonoBehaviour
         ind.fitness = Fitness(ind.p1, ind.p2);
 
         //Select indivdual from population to compare child to
-        Individual compIndividual = currentPopulation[Random.Range(0, currentPopulation.Count)];
+        Individual compIndividual = listOfPopulation[Random.Range(0, listOfPopulation.Count)];
 
         //Child is not fit to live
         if (ind.fitness < compIndividual.fitness) return;
 
         //Remove the compared individual
-        currentPopulation.Remove(compIndividual);
+        listOfPopulation.Remove(compIndividual);
         compIndividual.DestroyIndividual(deathColor);
 
         //Create new Child
@@ -140,7 +147,12 @@ public class Evolution : MonoBehaviour
         Renderer rend = ind.gameObject.GetComponent<Renderer>();
         rend.material.shader = Shader.Find("Standard");
         rend.material.SetColor("_Color", populationColor);
-        currentPopulation.Add(ind);
+        listOfPopulation.Add(ind);
+
+        offspringText.text = "[Births: " + offspringCount +
+                     "] [Generation: " + (int)(offspringCount / populationInit) +
+                     "] [Mutation: " + name +
+                     "] [AvgDistance: " + AvgDistance() + "]";
 
     }
 
@@ -165,6 +177,20 @@ public class Evolution : MonoBehaviour
         offspring.p2 = selParent.p2 + Random.Range(-0.5f, 0.5f);
     }
 
+    void Mutation3(Individual selParent, Individual offspring)
+    {
+        float highestFit = float.MinValue;
+        for (int i = 0; i < listOfPopulation.Count; i++)
+        {
+            if (highestFit < listOfPopulation[i].fitness) highestFit = listOfPopulation[i].fitness;
+        }
+
+        highestFit = Mathf.Max(-2.0f, Mathf.Min(2.0f, highestFit));
+        offspring.p1 = selParent.p1 + Random.Range(-highestFit, highestFit);
+        offspring.p2 = selParent.p2 + Random.Range(-highestFit, highestFit);
+    }
+
+
     public float GetAverageFitness()
     {
         float avgFit = 0;
@@ -175,6 +201,32 @@ public class Evolution : MonoBehaviour
         avgFit /= listOfPopulation.Count;
         return avgFit;
 
+    }
+
+    public float AvgDistance()
+    {
+        List<float> distanceList = new List<float>();
+
+        for (int i = 0; i < listOfPopulation.Count; i++)
+        {
+            for (int j = 0; j < listOfPopulation.Count; j++)
+            {
+                if (i == j) continue;
+                float dist = Vector2.Distance(new Vector2(listOfPopulation[i].p1, listOfPopulation[i].p2), new Vector2(listOfPopulation[j].p1, listOfPopulation[j].p2));
+                distanceList.Add(dist);
+            }
+        }
+
+        float avgDist = 0;
+
+        for (int i = 0; i < distanceList.Count; i++)
+        {
+            avgDist += distanceList[i];
+        }
+
+        avgDist /= distanceList.Count;
+
+        return avgDist;
     }
 
 

@@ -37,8 +37,8 @@ public class LineChart : MonoBehaviour {
             newObject.transform.localPosition = new Vector3(-.5f, -.5f, 0);
             newObject.transform.localScale = Vector3.one;
             LineRenderer lr = newObject.AddComponent<LineRenderer>();
-            lr.material = new Material(Shader.Find("Particles/Alpha Blended"));
-            lr.material.SetColor("_TintColor", evoList[i].populationColor);
+            lr.material = new Material(Shader.Find("Standard"));
+            lr.material.SetColor("_Color", evoList[i].populationColor);
             lr.useWorldSpace = false;
             lr.positionCount = evoList[i].populationInit;
             lr.startWidth = 0.05f;
@@ -61,16 +61,8 @@ public class LineChart : MonoBehaviour {
 
 
     }
-	
-	// Update is called once per frame
-	void Update () {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            BirthUpdate();
-        }
-    }
 
-    void BirthUpdate()
+    public void BirthUpdate()
     {
    
         for (int i = 0; i < evoList.Length; i++)
