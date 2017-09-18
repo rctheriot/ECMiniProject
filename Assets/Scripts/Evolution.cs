@@ -19,6 +19,8 @@ public class Evolution : MonoBehaviour
 
     public Landscape landscape;
 
+    public float avgFitness;
+
     public Mutation selectedMutation;
 
     public enum Mutation
@@ -161,6 +163,18 @@ public class Evolution : MonoBehaviour
     {
         offspring.p1 = selParent.p1 + Random.Range(-0.5f, 0.5f);
         offspring.p2 = selParent.p2 + Random.Range(-0.5f, 0.5f);
+    }
+
+    public float GetAverageFitness()
+    {
+        float avgFit = 0;
+        for (int i = 0; i < listOfPopulation.Count; i++)
+        {
+            avgFit += listOfPopulation[i].fitness;
+        }
+        avgFit /= listOfPopulation.Count;
+        return avgFit;
+
     }
 
 

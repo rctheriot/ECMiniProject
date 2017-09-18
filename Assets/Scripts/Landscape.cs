@@ -7,8 +7,8 @@ public class Landscape : MonoBehaviour {
     public Formulas selectedFormula;
     public Vector2 xBound;
     public Vector2 zBound;
-    private float yMin = float.MaxValue;
-    private float yMax = float.MinValue;
+    public float yMin = float.MaxValue;
+    public float yMax = float.MinValue;
 
     [Space(10)]
     public Color landscapeColor;
@@ -23,7 +23,7 @@ public class Landscape : MonoBehaviour {
     }
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
         CreateLandscape();
         CreateBoundingBox();
     }
