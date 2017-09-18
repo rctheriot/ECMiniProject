@@ -20,7 +20,6 @@ public class Landscape : MonoBehaviour {
     {
         formula1,
         formula2,
-        formula3
     }
 
 	// Use this for initialization
@@ -31,23 +30,27 @@ public class Landscape : MonoBehaviour {
 
     void CreateLandscape()
     {
-        //Create XAxis
+        GameObject grid = new GameObject();
+        grid.transform.parent = transform;
+        grid.name = "Grid";
+
+        //Create Grid
         for (int i = 0; i < numLines; i++)
         {
             float xPos = ((float)i / (numLines - 1)) * (xBound.x - xBound.y) + xBound.y;
             float zPos = ((float)i / (numLines - 1)) * (zBound.x - zBound.y) + zBound.y;
 
-            CreateLandScapeLine(new Vector3(xBound.x, 0, zPos), new Vector3(xBound.y, 0, zPos));
-            CreateLandScapeLine(new Vector3(xPos, 0, zBound.y), new Vector3(xPos, 0, zBound.x));
+            CreateLandScapeLine(new Vector3(xBound.x, 0, zPos), new Vector3(xBound.y, 0, zPos), grid.transform);
+            CreateLandScapeLine(new Vector3(xPos, 0, zBound.y), new Vector3(xPos, 0, zBound.x), grid.transform);
         }
 
     }
 
-    void CreateLandScapeLine(Vector3 StartPoint, Vector3 EndPoint)
+    void CreateLandScapeLine(Vector3 StartPoint, Vector3 EndPoint, Transform GridParent)
     {
         GameObject newLine = new GameObject();
         newLine.name = StartPoint.ToString() + ", " + EndPoint.ToString();
-        newLine.transform.parent = transform;
+        newLine.transform.parent = GridParent;
         LineRenderer lr = newLine.AddComponent<LineRenderer>();
         lr.material = new Material(Shader.Find("Particles/Alpha Blended"));
         lr.material.SetColor("_TintColor", landscapeColor);
@@ -62,6 +65,8 @@ public class Landscape : MonoBehaviour {
             {
                 float xPos = (StartPoint.x - EndPoint.x) * ((float)i / (lr.positionCount - 1)) + EndPoint.x;
                 float zPos = (StartPoint.z - EndPoint.z) * ((float)i / (lr.positionCount - 1)) + EndPoint.z;
+
+                //Formula 1
                 float yPos = (xPos * xPos) + (zPos * zPos);
 
                 if (yPos < yMin) yMin = yPos;
@@ -72,11 +77,17 @@ public class Landscape : MonoBehaviour {
             }
             else if (selectedFormula == Formulas.formula2)
             {
-                lr.SetPosition(i, new Vector3(0, i, 0));
-            }
-            else if (selectedFormula == Formulas.formula3)
-            {
-                lr.SetPosition(i, new Vector3(0, 0, i));
+                float xPos = (StartPoint.x - EndPoint.x) * ((float)i / (lr.positionCount - 1)) + EndPoint.x;
+                float zPos = (StartPoint.z - EndPoint.z) * ((float)i / (lr.positionCount - 1)) + EndPoint.z;
+
+                //Formula 2
+                float yPos = 10 * Mathf.Cos(3.0f * Mathf.Pow(Mathf.Pow(xPos, 2.0f) + Mathf.Pow(zPos, 2.0f), 0.5f) + 1f * 0.5f);
+
+                if (yPos < yMin) yMin = yPos;
+                if (yPos > yMax) yMax = yPos;
+
+                Vector3 pointPosition = new Vector3(xPos, yPos, zPos);
+                lr.SetPosition(i, pointPosition);
             }
 
         }
@@ -85,26 +96,30 @@ public class Landscape : MonoBehaviour {
 
     void CreateBoundingBox()
     {
-        CreateBoundingLine(new Vector3(xBound.x, yMin, zBound.x), new Vector3(xBound.x, yMin, zBound.y));
-        CreateBoundingLine(new Vector3(xBound.x, yMin, zBound.x), new Vector3(xBound.y, yMin, zBound.x));
-        CreateBoundingLine(new Vector3(xBound.y, yMin, zBound.y), new Vector3(xBound.x, yMin, zBound.y));
-        CreateBoundingLine(new Vector3(xBound.y, yMin, zBound.y), new Vector3(xBound.y, yMin, zBound.x));
+        GameObject boundingBox = new GameObject();
+        boundingBox.transform.parent = transform;
+        boundingBox.name = "BoundingBox";
 
-        CreateBoundingLine(new Vector3(xBound.x, yMax, zBound.x), new Vector3(xBound.x, yMax, zBound.y));
-        CreateBoundingLine(new Vector3(xBound.x, yMax, zBound.x), new Vector3(xBound.y, yMax, zBound.x));
-        CreateBoundingLine(new Vector3(xBound.y, yMax, zBound.y), new Vector3(xBound.x, yMax, zBound.y));
-        CreateBoundingLine(new Vector3(xBound.y, yMax, zBound.y), new Vector3(xBound.y, yMax, zBound.x));
+        CreateBoundingLine(new Vector3(xBound.x, yMin, zBound.x), new Vector3(xBound.x, yMin, zBound.y), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.x, yMin, zBound.x), new Vector3(xBound.y, yMin, zBound.x), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.y, yMin, zBound.y), new Vector3(xBound.x, yMin, zBound.y), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.y, yMin, zBound.y), new Vector3(xBound.y, yMin, zBound.x), boundingBox.transform);
 
-        CreateBoundingLine(new Vector3(xBound.x, yMin, zBound.x), new Vector3(xBound.x, yMax, zBound.x));
-        CreateBoundingLine(new Vector3(xBound.x, yMin, zBound.y), new Vector3(xBound.x, yMax, zBound.y));
-        CreateBoundingLine(new Vector3(xBound.y, yMin, zBound.x), new Vector3(xBound.y, yMax, zBound.x));
-        CreateBoundingLine(new Vector3(xBound.y, yMin, zBound.y), new Vector3(xBound.y, yMax, zBound.y));
+        CreateBoundingLine(new Vector3(xBound.x, yMax, zBound.x), new Vector3(xBound.x, yMax, zBound.y), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.x, yMax, zBound.x), new Vector3(xBound.y, yMax, zBound.x), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.y, yMax, zBound.y), new Vector3(xBound.x, yMax, zBound.y), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.y, yMax, zBound.y), new Vector3(xBound.y, yMax, zBound.x), boundingBox.transform);
+
+        CreateBoundingLine(new Vector3(xBound.x, yMin, zBound.x), new Vector3(xBound.x, yMax, zBound.x), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.x, yMin, zBound.y), new Vector3(xBound.x, yMax, zBound.y), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.y, yMin, zBound.x), new Vector3(xBound.y, yMax, zBound.x), boundingBox.transform);
+        CreateBoundingLine(new Vector3(xBound.y, yMin, zBound.y), new Vector3(xBound.y, yMax, zBound.y), boundingBox.transform);
     }
 
-    void CreateBoundingLine(Vector3 StartPoint, Vector3 EndPoint)
+    void CreateBoundingLine(Vector3 StartPoint, Vector3 EndPoint, Transform bbParent)
     {
         GameObject newLine = new GameObject();
-        newLine.transform.parent = transform;
+        newLine.transform.parent = bbParent;
         LineRenderer lr = newLine.AddComponent<LineRenderer>();
         lr.material = new Material(Shader.Find("Standard"));
         lr.material.SetColor("_Color", Color.white);
@@ -147,4 +162,5 @@ public class Landscape : MonoBehaviour {
         if (degrees > 180) degrees -= 360;
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, degrees);
     }
+
 }
