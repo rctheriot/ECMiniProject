@@ -94,7 +94,7 @@ public class Evolution : MonoBehaviour
         else if (landscape.selectedFormula == Landscape.Formulas.formula2)
         {
             //Formula 2
-            float fitness = 10 * Mathf.Cos(3.0f * Mathf.Pow(Mathf.Pow(xPos, 2.0f) + Mathf.Pow(zPos, 2.0f), 0.5f) + 0.5f);
+            float fitness =  10 * Mathf.Cos(3.0f * Mathf.Sqrt(xPos * xPos + zPos * zPos) + 0.5f);
             return fitness;
         }
         return 0;
@@ -108,7 +108,7 @@ public class Evolution : MonoBehaviour
                      "] [Mutation: " + name +
                      "] [AvgDistance: " + AvgDistance() + "]";
 
-        //Randomly select parent to produce offsrping
+        //Randomly select parent to produce offspring
         Individual selectedParent = listOfPopulation[Random.Range(0, listOfPopulation.Count)];
 
         //New Offspring
@@ -120,7 +120,7 @@ public class Evolution : MonoBehaviour
         if (selectedMutation == Mutation.mutation2)
             Mutation2(selectedParent, ind);
         if (selectedMutation == Mutation.mutation3)
-            Mutation2(selectedParent, ind);
+            Mutation3(selectedParent, ind);
 
         //Limit to landscape
         ind.p1 = Mathf.Max(landscape.xBound.x, Mathf.Min(ind.p1, landscape.xBound.y));
@@ -185,9 +185,9 @@ public class Evolution : MonoBehaviour
             if (highestFit < listOfPopulation[i].fitness) highestFit = listOfPopulation[i].fitness;
         }
 
-        highestFit = Mathf.Max(-2.0f, Mathf.Min(2.0f, highestFit));
-        offspring.p1 = selParent.p1 + Random.Range(-highestFit, highestFit);
-        offspring.p2 = selParent.p2 + Random.Range(-highestFit, highestFit);
+        float range = highestFit - selParent.fitness;
+        offspring.p1 = selParent.p1 + Random.Range(-range, range);
+        offspring.p2 = selParent.p2 + Random.Range(-range, range);
     }
 
 

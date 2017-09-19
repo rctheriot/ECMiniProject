@@ -42,7 +42,7 @@ public class Landscape : MonoBehaviour {
         transform.localScale = new Vector3(.6f, .05f, .6f);
         transform.rotation = Quaternion.Euler(-20, 40, -10);
         pause = true;
-        InvokeRepeating("Evolve", 1.0f, 0.5f);
+        InvokeRepeating("Evolve", 1.0f, 0.05f);
     }
 
     public void pauseStart()
@@ -124,7 +124,7 @@ public class Landscape : MonoBehaviour {
                 float zPos = (StartPoint.z - EndPoint.z) * ((float)i / (lr.positionCount - 1)) + EndPoint.z;
 
                 //Formula 2
-                float yPos = 10 * Mathf.Cos(3.0f * Mathf.Pow(Mathf.Pow(xPos, 2.0f) + Mathf.Pow(zPos, 2.0f), 0.5f) + 0.5f);
+                float yPos = 10 * Mathf.Cos(3.0f * Mathf.Sqrt(xPos * xPos + zPos * zPos) + 0.5f);
 
                 if (yPos < yMin) yMin = yPos;
                 if (yPos > yMax) yMax = yPos;

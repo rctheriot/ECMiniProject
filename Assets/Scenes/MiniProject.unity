@@ -543,7 +543,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpherePrefab: {fileID: 1735677128153736, guid: 553ae51ff69544842947042549e57857,
     type: 2}
-  name: '*(-2.0 to 2.0)'
+  name: Dynamic
   populationInit: 10
   populationColor: {r: 0.29925388, g: 0.99264705, b: 0.30403587, a: 1}
   deathColor: {r: 0.29411763, g: 0.29411763, b: 0.29411763, a: 1}
